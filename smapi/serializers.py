@@ -1,9 +1,21 @@
 from rest_framework import serializers
-from smapi.models import createPost
+from smapi.models import createPost,comment
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= comment
+        # fields="__all__"
+        fields = ['comm']
+
 
 class CreatePostSerializer(serializers.ModelSerializer):
     # created_by = serializers.StringRelatedField()  # Show the username instead of user ID
+    comments=CommentSerializer(many=True,read_only=True)
     created_by = serializers.ReadOnlyField(source='created_by.name')  # Get the username instead of the User object
+
     class Meta:
         model=createPost
         fields="__all__"
+        # exclude=('post',)
+
+

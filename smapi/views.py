@@ -1,11 +1,11 @@
 from rest_framework.views import APIView
 from smapi.models import createPost
-from smapi.serializers import CreatePostSerializer
+from smapi.serializers import CreatePostSerializer, CommentSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 class CreatePostView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     def get(self,request):
         all_post=createPost.objects.all()
         serializer=CreatePostSerializer(all_post, many=True)
@@ -19,6 +19,30 @@ class CreatePostView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors)
         
+class CommentView(APIView):
+    def get(self,request,pk):
+        try:
+            post=createPost.objects.get(pk=pk)
+            serializer=CreatePostSerializer(post)
+            return Response(serializer.data)
+
+        except:
+            return Response(serializer.errors)
+
+    
+    def post(self,request,pk):
+        try:
+            post=createPost.objects.get(pk=pk)
+            serializer=CommentSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(post=post)
+                return Response(serializer.data)
+            
+            else:
+                return Response(serializer.errors)
+
+        except:
+            return Response({"data":"errors"})
 
 
     
