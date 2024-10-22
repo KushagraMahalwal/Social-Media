@@ -2,10 +2,11 @@ from rest_framework import serializers
 from smapi.models import createPost,comment
 
 class CommentSerializer(serializers.ModelSerializer):
+    commented_by=serializers.ReadOnlyField(source='commented_by.name')
     class Meta:
         model= comment
         # fields="__all__"
-        fields = ['comm']
+        fields = ['comm','commented_by']
 
 
 class CreatePostSerializer(serializers.ModelSerializer):
