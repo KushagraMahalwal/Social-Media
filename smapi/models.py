@@ -7,7 +7,7 @@ class createPost(models.Model):
     created_by=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, related_name="crateposts")
 
     def __str__(self):
-        return self.created_by
+        return f"created_by{self.created_by}"
 
 class comment(models.Model):
     comm=models.TextField(max_length=100)

@@ -1,12 +1,13 @@
 from rest_framework import serializers
 from smapi.models import createPost,comment
+from django.contrib.auth.models import User
+ 
 
 class CommentSerializer(serializers.ModelSerializer):
     commented_by=serializers.ReadOnlyField(source='commented_by.name')
     class Meta:
         model= comment
-        # fields="__all__"
-        fields = ['comm','commented_by']
+        fields = ['id','comm','commented_by']
 
 
 class CreatePostSerializer(serializers.ModelSerializer):
@@ -17,6 +18,4 @@ class CreatePostSerializer(serializers.ModelSerializer):
     class Meta:
         model=createPost
         fields="__all__"
-        # exclude=('post',)
-
 
