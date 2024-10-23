@@ -95,6 +95,13 @@ class ProfileView(APIView):
             "email":user.email
         }
         return Response(data)
-
+    
+class currentUserPost(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user=request.user
+        post=createPost.objects.filter(created_by=user)
+        serializer=CreatePostSerializer(post, many=True)
+        return Response(serializer.data)
     
 
