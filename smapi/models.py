@@ -5,6 +5,7 @@ from django.conf import settings
 class createPost(models.Model):
     text=models.TextField()
     created_by=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, related_name="crateposts")
+    liked_by=models.ManyToManyField(settings.AUTH_USER_MODEL,related_name="like", blank=True)
 
     def __str__(self):
         return f"created_by{self.created_by}"

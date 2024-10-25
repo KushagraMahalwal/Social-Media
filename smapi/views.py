@@ -3,6 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from smapi.serializers import CreatePostSerializer, CommentSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+
+
 
 # create/view all posts
 class CreatePostView(APIView):
@@ -103,5 +107,25 @@ class currentUserPost(APIView):
         post=createPost.objects.filter(created_by=user)
         serializer=CreatePostSerializer(post, many=True)
         return Response(serializer.data)
-    
 
+
+class LikePostView(APIView):
+    def post(self, request, post_id):
+        post = get_object_or_404(createPost, id=post_id)
+        user = request.user
+
+        # Toggle like/unlike based on whether the user already liked the post
+        if post.liked_by.filter(id=user.id).exists():
+            post.liked_by.remove(user)
+            message = "You have unliked the post."
+        else:
+            post.liked_by.add(user)
+            message = "You have liked the post."
+
+        # Fetch all names of users who liked the post
+        liked_by_names = post.liked_by.values_list('name', flat=True)
+        return Response({
+            'message': message,
+            'likes_count': post.liked_by.count(),
+            'liked_by': list(liked_by_names)  # List of usernames who liked the post
+        }, status=status.HTTP_200_OK)

@@ -14,8 +14,12 @@ class CreatePostSerializer(serializers.ModelSerializer):
     # created_by = serializers.StringRelatedField()  # Show the username instead of user ID
     comments=CommentSerializer(many=True,read_only=True)
     created_by = serializers.ReadOnlyField(source='created_by.name')  # Get the username instead of the User object
-
+    liked_by = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')  # Show usernames of users who liked
+    
     class Meta:
         model=createPost
         fields="__all__"
+
+class LikePostSerializer(serializers.ModelSerializer):
+    post_id=serializers.IntegerField()
 
