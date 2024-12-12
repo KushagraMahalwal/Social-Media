@@ -1,12 +1,21 @@
 from django.contrib import admin
 from django.urls import path
-from smapi.views import CreatePostView, CommentView, ProfileView, CreatePostDetails, currentUserPost, LikePostView
+from smapi.views import (CreatePostView, CommentView, ProfileView, CreatePostDetails, 
+                         currentUserPost, LikePostView, CommentViewDetails)
 
 urlpatterns = [
-    path('createpost/', CreatePostView.as_view(), name='register'),
-    path('createpost/<int:pk>/',CreatePostDetails.as_view(), name="createPostDetails"),
-    path('comment/<int:pk>/',CommentView.as_view(), name="commentview"),
-    path('profile/',ProfileView.as_view(), name="profileview"),   
-    path('currpost/',currentUserPost.as_view(), name="curr"),
-    path('posts/<int:post_id>/like/', LikePostView.as_view(), name='like-post')
+    # get/create the post
+    path('post/', CreatePostView.as_view()),
+    # update/delete the post
+    path('post/<int:pk>/',CreatePostDetails.as_view()),
+    # add comment to a specified post
+    path('comment/<int:pk>/',CommentView.as_view()),
+    # get profile view
+    path('profile/',ProfileView.as_view()), 
+    # get logged in user post  
+    path('userPost/',currentUserPost.as_view()),
+    # like the specified post
+    path('post/<int:post_id>/like/', LikePostView.as_view()),
+    # delete the comment on a specified post
+    path('post/<int:post_pk>/comment/<int:comment_pk>/',CommentViewDetails.as_view())
 ]
