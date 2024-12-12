@@ -1,14 +1,11 @@
-from smapi.models import createPost
+from rest_framework import status
 from rest_framework.views import APIView
+from smapi.models import createPost,comment
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from smapi.serializers import CreatePostSerializer, CommentSerializer
-from django.shortcuts import get_object_or_404
-from rest_framework import status
 
-
-
-# create/view all posts
+# create/view all post
 class CreatePostView(APIView):
     # Ensure only authenticated users can create posts
     permission_classes = [IsAuthenticated]
@@ -52,7 +49,6 @@ class CreatePostDetails(APIView):
         else:
             return Response({"Data":"Post Not Found"})
 
-
     def delete(self,request,pk):
         try:
             user=request.user
@@ -65,7 +61,6 @@ class CreatePostDetails(APIView):
         except:
             return Response({"Data":"Post Not Found"})
     
-
 #Comment to a particular post/ retrieving the post 
 class CommentView(APIView):
     permission_classes = [IsAuthenticated]
@@ -89,6 +84,35 @@ class CommentView(APIView):
         except:
             return Response({"data":"errors"})
 
+class CommentViewDetails(APIView):
+    # updating the comment
+    def put(self,request,post_pk, comment_pk):
+        try:
+            post=createPost.objects.get(pk=post_pk)
+            comment_instance=comment.objects.get(pk=comment_pk, post=post)
+            serializer=CommentSerializer(comment_instance,data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors)
+        except:
+            return Response({'Data':'Not Found'})
+        
+     # deleting the comment     
+    def delete(self,request,post_pk, comment_pk):
+        try:
+            # get the post by pk
+            post=createPost.objects.get(pk=post_pk)
+            # get the comment that belong to specified post
+            comment_instance=comment.objects.get(pk=comment_pk, post=post)
+            comment_instance.delete()
+            return Response({'Data':'Post Deleted Successfully'})
+        except createPost.DoesNotExist:
+            return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+        except comment.DoesNotExist:
+            return Response({"error": "Comment not found for this post"}, status=status.HTTP_404_NOT_FOUND)
+
 #View Profile of authenticated users 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -108,24 +132,29 @@ class currentUserPost(APIView):
         serializer=CreatePostSerializer(post, many=True)
         return Response(serializer.data)
 
-
 class LikePostView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request, post_id):
-        post = get_object_or_404(createPost, id=post_id)
-        user = request.user
+        try:
+            # post = get_object_or_404(createPost,id=post_id)
+            post=createPost.objects.get(id=post_id)
+            user = request.user
 
-        # Toggle like/unlike based on whether the user already liked the post
-        if post.liked_by.filter(id=user.id).exists():
-            post.liked_by.remove(user)
-            message = "You have unliked the post."
-        else:
-            post.liked_by.add(user)
-            message = "You have liked the post."
+            # Toggle like/unlike based on whether the user already liked the post
+            if post.liked_by.filter(id=user.id).exists():
+                post.liked_by.remove(user)
+                message = "You have unliked the post."
+            else:
+                post.liked_by.add(user)
+                message = "You have liked the post."
 
-        # Fetch all names of users who liked the post
-        liked_by_names = post.liked_by.values_list('name', flat=True)
-        return Response({
-            'message': message,
-            'likes_count': post.liked_by.count(),
-            'liked_by': list(liked_by_names)  # List of usernames who liked the post
-        }, status=status.HTTP_200_OK)
+            # Fetch all names of users who liked the post
+            liked_by_names = post.liked_by.values_list('name', flat=True)
+            return Response({
+                'message': message,
+                'likes_count': post.liked_by.count(),
+                'liked_by': list(liked_by_names)  # List of usernames who liked the post
+            }, status=status.HTTP_200_OK)
+        
+        except:
+            return Response({'Data':'No post found'})
